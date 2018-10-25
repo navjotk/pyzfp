@@ -1,5 +1,5 @@
 # pyzfp
-Quick and dirty wrapper over the zfp compression library. Written using ctypes so it was quick to write,
+Quick and dirty wrapper over the [zfp compression library](https://computation.llnl.gov/projects/floating-point-compression). Written using ctypes so it was quick to write,
 although that makes it harder to use. Near Future Work: rewrite this in cython.
 
 # Installation
