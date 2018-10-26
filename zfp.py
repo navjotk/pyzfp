@@ -1,7 +1,7 @@
 from ctypes import cdll
 import numpy as np
 import ctypes
-
+import os
 
 class BitStream(ctypes.Structure):
     pass
@@ -21,8 +21,8 @@ class ZfpField(ctypes.Structure):
                 ("sz", ctypes.c_int), ("data", ctypes.c_void_p)]
 
 
-
-libzfp = cdll.LoadLibrary("zfp-0.5.3/lib/libzfp.so")
+path = os.path.dirname(os.path.realpath(__file__))
+libzfp = cdll.LoadLibrary("%s/zfp-0.5.3/lib/libzfp.so" % path)
 libzfp.zfp_stream_set_accuracy.argtypes = (ctypes.POINTER(ZfpStream), ctypes.c_double)
 libzfp.zfp_stream_set_precision.argtypes = (ctypes.POINTER(ZfpStream), ctypes.c_int)
 libzfp.zfp_stream_set_rate.argtypes = (ctypes.POINTER(ZfpStream), ctypes.c_double,
