@@ -4,3 +4,6 @@ zfp-0.5.3/lib/libzfp.so: zfp-0.5.3.tar.gz
 
 zfp-0.5.3.tar.gz: 
 	wget https://computation.llnl.gov/projects/floating-point-compression/download/zfp-0.5.3.tar.gz
+
+clean:
+	rm -rf zfp-0.5.3*

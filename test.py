@@ -6,7 +6,6 @@ from zfp import compress, decompress
 a = np.linspace(0, 100, num=1000000).reshape((100, 100, 100))
 
 
-
 tolerance = 0.0000001
 compressed = compress(a, tolerance=tolerance)
 
