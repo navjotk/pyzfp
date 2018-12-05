@@ -1,6 +1,6 @@
 import numpy as np
 
-from zfp import compress, decompress
+from pyzfp import compress, decompress
 
 
 a = np.linspace(0, 100, num=1000000).reshape((100, 100, 100))
