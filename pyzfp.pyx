@@ -134,10 +134,12 @@ cdef extern from "zfp.h":
       zfp_field* field #/* field metadata */
   );
 
-cdef void* raw_pointer(np.ndarray numpy_array):
-    return <void*>numpy_array.ctypes.data
+cdef void* raw_pointer(arr) except NULL:
+    assert(arr.flags.c_contiguous) # if this isn't true, ravel will make a copy
+    cdef double[::1] mview = arr.ravel()
+    return <void*>&mview[0]
 
-zfp_types = {np.dtype('float32'): 3, np.dtype('float64'): 4}
+zfp_types = {np.dtype('float32'): zfp_type_float, np.dtype('float64'): zfp_type_double}
 
 cdef zfp_field* init_field(np.ndarray indata):
     data_type = zfp_types[indata.dtype]
@@ -176,8 +178,8 @@ def compress(indata, tolerance=None, precision=None, rate=None, parallel=True):
     if(parallel):
         zfp_stream_set_execution(stream, zfp_exec_omp)
     bufsize = zfp_stream_maximum_size(stream, field)
-    buff = view.array(shape=(bufsize,))
-    bitstream = stream_open(<void*>buff, bufsize)
+    cdef char[::1] buff = view.array(shape=(bufsize,), itemsize=sizeof(char), format='B')
+    bitstream = stream_open(<void *>&buff[0], bufsize)
     zfp_stream_set_bit_stream(stream, bitstream)
     zfp_stream_rewind(stream)
     zfpsize = zfp_compress(stream, field)
@@ -188,7 +190,7 @@ def compress(indata, tolerance=None, precision=None, rate=None, parallel=True):
     return buff[:zfpsize]
 
 
-def decompress(compressed, shape, dtype, tolerance=None, precision=None,
+def decompress(char[::1] compressed, shape, dtype, tolerance=None, precision=None,
                rate=None, parallel=True):
     assert(tolerance or precision or rate)
     assert(not(tolerance is not None and precision is not None))
@@ -207,14 +209,12 @@ def decompress(compressed, shape, dtype, tolerance=None, precision=None,
     elif rate is not None:
         zfp_stream_set_rate(stream, rate, data_type, len(shape), 0)
     # Try multithreaded
-    if(parallel):
-        zfp_stream_set_execution(stream, zfp_exec_omp)
-    bufsize = zfp_stream_maximum_size(stream, field)
-    bitstream = stream_open(<void*>compressed, bufsize)
+    #if(parallel):
+    #    zfp_stream_set_execution(stream, zfp_exec_omp)
+    bitstream = stream_open(<void*>&compressed[0], len(compressed))
     zfp_stream_set_bit_stream(stream, bitstream)
     zfp_stream_rewind(stream)
     zfp_decompress(stream, field)
-
     zfp_field_free(field)
     zfp_stream_close(stream)
     stream_close(bitstream)
