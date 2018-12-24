@@ -36,6 +36,7 @@ libzfp.zfp_stream_set_rate.argtypes = (ctypes.POINTER(ZfpStream),
                                        ctypes.c_double, ctypes.c_int,
                                        ctypes.c_int, ctypes.c_int)
 libzfp.zfp_stream_maximum_size.argtypes = (ctypes.c_void_p, ctypes.c_void_p)
+libzfp.zfp_stream_maximum_size.restype = ctypes.POINTER(ctypes.c_ulonglong)
 libzfp.zfp_stream_set_bit_stream.argtypes = (ctypes.c_void_p, ctypes.c_void_p)
 libzfp.zfp_stream_rewind.argtypes = (ctypes.c_void_p,)
 libzfp.zfp_stream_open.restype = ctypes.POINTER(ZfpStream)
