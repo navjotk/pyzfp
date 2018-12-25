@@ -75,7 +75,7 @@ def compress(indata, tolerance=None, precision=None, rate=None, parallel=True):
     # Try multithreaded
     if(parallel):
         libzfp.zfp_stream_set_execution(stream, 1)
-    bufsize = libzfp.zfp_stream_maximum_size(stream, field)
+    bufsize = int(libzfp.zfp_stream_maximum_size(stream, field))
     buff = ctypes.create_string_buffer(bufsize)
     bitstream = libzfp.stream_open(buff, bufsize)
     libzfp.zfp_stream_set_bit_stream(stream, bitstream)
