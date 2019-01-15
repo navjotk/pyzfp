@@ -52,7 +52,7 @@ def compare_compressors():
     
 
 def measure_compressor(compress, decompress):
-    sizes = [10, 100, 1000, 10000, 100000]#, 1000000, 10000000, 100000000] #, 1000000000, 10000000000]
+    sizes = [10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000] #, 1000000000, 10000000000]
     compress_timings = []
     decompress_timings = []
     tolerance = 0.0001

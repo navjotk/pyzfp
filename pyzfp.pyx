@@ -134,10 +134,23 @@ cdef extern from "zfp.h":
       zfp_field* field #/* field metadata */
   );
 
-cdef void* raw_pointer(arr) except NULL:
+cdef void* raw_pointer_double(arr) except NULL:
+    assert(arr.dtype==np.float64)
     assert(arr.flags.c_contiguous) # if this isn't true, ravel will make a copy
     cdef double[::1] mview = arr.ravel()
     return <void*>&mview[0]
+
+cdef void* raw_pointer_float(arr) except NULL:
+    assert(arr.flags.c_contiguous) # if this isn't true, ravel will make a copy
+    assert(arr.dtype == np.float32)
+    cdef float[::1] mview = arr.ravel()
+    return <void*>&mview[0]
+
+cdef void* raw_pointer(arr):
+    if arr.dtype == np.float32:
+        return raw_pointer_float(arr)
+    else:
+        return raw_pointer_double(arr)
 
 zfp_types = {np.dtype('float32'): zfp_type_float, np.dtype('float64'): zfp_type_double}
 

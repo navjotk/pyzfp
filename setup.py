@@ -5,8 +5,7 @@ import os
 import glob
 import numpy
 
-os.environ["CC"] = "gcc-8"
-
+os.environ["CC"] = "gcc"
 ext_modules = [
     Extension("pyzfp",
               sources=["pyzfp.pyx"],
