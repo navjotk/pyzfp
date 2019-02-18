@@ -36,6 +36,7 @@ libzfp.zfp_stream_set_rate.argtypes = (ctypes.POINTER(ZfpStream),
                                        ctypes.c_double, ctypes.c_int,
                                        ctypes.c_int, ctypes.c_int)
 libzfp.zfp_stream_maximum_size.argtypes = (ctypes.c_void_p, ctypes.c_void_p)
+libzfp.zfp_stream_maximum_size.restype = ctypes.c_ulong
 libzfp.zfp_stream_set_bit_stream.argtypes = (ctypes.c_void_p, ctypes.c_void_p)
 libzfp.zfp_stream_rewind.argtypes = (ctypes.c_void_p,)
 libzfp.zfp_stream_open.restype = ctypes.POINTER(ZfpStream)
@@ -74,7 +75,7 @@ def compress(indata, tolerance=None, precision=None, rate=None, parallel=True):
     # Try multithreaded
     if(parallel):
         libzfp.zfp_stream_set_execution(stream, 1)
-    bufsize = libzfp.zfp_stream_maximum_size(stream, field)
+    bufsize = int(libzfp.zfp_stream_maximum_size(stream, field))
     buff = ctypes.create_string_buffer(bufsize)
     bitstream = libzfp.stream_open(buff, bufsize)
     libzfp.zfp_stream_set_bit_stream(stream, bitstream)
