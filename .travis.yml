@@ -22,5 +22,6 @@ addons:
       - g++-5
 
 script:
+  - pip install -r requirements.txt
   - pip install -e .
   - py.test -svx test.py
