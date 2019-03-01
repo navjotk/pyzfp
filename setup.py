@@ -74,10 +74,10 @@ class specialized_build_ext(build_ext, object):
                                             shell=True)
             stdout, stderr = make_process.communicate()
             distutils_logger.debug(stdout)
-            if stderr:
-                raise DistutilsSetupError('An ERROR occured while running the '
-                                          'Makefile for the {0} library. '
-                                          'Error status: {1}'.format(output_lib, stderr))
+            #if stderr:
+            #    raise DistutilsSetupError('An ERROR occured while running the '
+            #                              'Makefile for the {0} library. '
+            #                              'Error status: {1}'.format(output_lib, stderr))
             # After making the library build the c library's python interface with the parent build_extension method
             super(specialized_build_ext, self).build_extension(ext)
 
