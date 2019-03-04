@@ -1,6 +1,5 @@
 # pyzfp
-Quick and dirty wrapper over the [zfp compression library](https://computation.llnl.gov/projects/floating-point-compression). Written using ctypes so it was quick to write,
-although that makes it harder to use. Near Future Work: rewrite this in cython.
+Quick and dirty wrapper over the [zfp compression library](https://computation.llnl.gov/projects/floating-point-compression). This is the second version, rewritten using Cython because the earlier version using ctypes was slow. [Click here](https://github.com/navjotk/pyzfp/blob/ctypes_vs_cython/ctypes_vs_cython_compression.png) for performance comparison. 
 
 # Installation
 ```

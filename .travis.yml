@@ -1,0 +1,27 @@
+sudo: false
+
+language: python
+
+matrix:
+  include:
+    - os: linux
+      python: "3.6"
+      env: PYTHONPATH=$PWD
+    - os: linux
+      python: "2.7"
+      env: PYTHONPATH=$PWD
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test     # For gcc 4.9 and 5
+    packages:
+      - gcc-4.9
+      - g++-4.9
+      - gcc-5
+      - g++-5
+
+script:
+  - pip install -r requirements.txt
+  - pip install -e .
+  - py.test -svx test.py
