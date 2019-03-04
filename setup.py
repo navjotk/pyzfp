@@ -3,14 +3,35 @@ from setuptools.extension import Extension
 from setuptools.command.build_ext import build_ext
 from distutils import log as distutils_logger
 from distutils.errors import DistutilsSetupError
-from Cython.Build import cythonize
+
 import os, subprocess
 import glob
 import numpy
+import setuptools
+
+class lazy_cythonize(list):
+    def __init__(self, callback):
+        self._list, self.callback = None, callback
+
+    def c_list(self):
+        if self._list is None:
+            self._list = self.callback()
+        return self._list
+
+    def __iter__(self):
+        for e in self.c_list():
+            yield e
+
+    def __getitem__(self, ii):
+        return self.c_list()[ii]
+
+    def __len__(self):
+        return len(self.c_list())
 
 
-ext_modules = [
-    Extension("pyzfp",
+def extensions():
+    from Cython.Build import cythonize
+    ext = Extension("pyzfp",
               sources=["pyzfp.pyx"],
               include_dirs=['zfp-0.5.3/include',
                             numpy.get_include()],
@@ -19,14 +40,14 @@ ext_modules = [
               extra_compile_args=['-fopenmp'],
              extra_link_args=['-fopenmp', '-Wl,-rpath,/usr/local/lib']
               )
-]
+    return cythonize([ext])
 
 class specialized_build_ext(build_ext, object):
     """
     Specialized builder for testlib library
 
     """
-    special_extension = ext_modules[0].name
+    special_extension = "pyzfp"
 
     def build_extension(self, ext):
 
@@ -81,7 +102,24 @@ class specialized_build_ext(build_ext, object):
             # After making the library build the c library's python interface with the parent build_extension method
             super(specialized_build_ext, self).build_extension(ext)
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
 
-setup(name="pyzfp",
-      ext_modules=cythonize(ext_modules, gdb_debug=True), 
-      cmdclass={'build_ext': specialized_build_ext})
+
+configuration = {
+    'name': 'pyzfp',
+    'packages': setuptools.find_packages(),
+    'setup_requires': ['cython>=0.17'],
+    'ext_modules': lazy_cythonize(extensions),
+    'version': "0.1.4",
+    'cmdclass': {'build_ext': specialized_build_ext},
+    'description': "A python wrapper for the ZFP compression libary",
+    'long_description': long_description,
+    'url': 'https://github.com/navjotk/pyzfp',
+    'author': "Navjot Kukreja",
+    'author_email': 'navjotk@gmail.com',
+    'license': 'MIT',
+}
+
+
+setup(**configuration)
