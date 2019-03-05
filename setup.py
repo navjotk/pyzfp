@@ -9,6 +9,35 @@ import glob
 import numpy
 import setuptools
 
+
+def download_file(url):
+    import requests
+    fname = url.split("/")[-1]
+    r = requests.get(url)
+    open(fname , 'wb').write(r.content)
+    
+# check whether compiler supports a flag
+def has_flag(compiler, flagname):
+    import tempfile
+    from distutils.errors import CompileError
+    with tempfile.NamedTemporaryFile('w', suffix='.cpp') as f:
+        f.write('int main (int argc, char **argv) { return 0; }')
+        try:
+            compiler.compile([f.name], extra_postargs=[flagname])
+        except CompileError:
+            return False
+    return True
+
+
+# filter flags, returns list of accepted flags
+def flag_filter(compiler, *flags):
+    result = []
+    for flag in flags:
+        if has_flag(compiler, flag):
+            result.append(flag)
+    return result
+
+
 class lazy_cythonize(list):
     def __init__(self, callback):
         self._list, self.callback = None, callback
@@ -37,8 +66,7 @@ def extensions():
                             numpy.get_include()],
               libraries=["zfp"],  # Unix-like specific,
               library_dirs=["zfp-0.5.3/lib"],
-              extra_compile_args=['-fopenmp'],
-             extra_link_args=['-fopenmp', '-Wl,-rpath,/usr/local/lib']
+             extra_link_args=['-Wl,-rpath,/usr/local/lib']
               )
     return cythonize([ext])
 
@@ -50,7 +78,14 @@ class specialized_build_ext(build_ext, object):
     special_extension = "pyzfp"
 
     def build_extension(self, ext):
-
+        if has_flag(self.compiler, '-fopenmp'):
+            for ext in self.extensions:
+                ext.extra_compile_args += '-fopenmp'
+                ext.extra_link_args += '-fopenmp'
+            clang = False
+        else:
+            clang = True
+            
         if ext.name!=self.special_extension:
             # Handle unspecial extensions with the parent class' method
             super(specialized_build_ext, self).build_extension(ext)
@@ -81,12 +116,11 @@ class specialized_build_ext(build_ext, object):
             output_dir = os.path.realpath(os.path.join(sources_path,'..','lib'))
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
-
-            output_lib = 'libtestlib.a'
-
+            download_file('https://computation.llnl.gov/projects/floating-point-compression/download/zfp-0.5.3.tar.gz')
             command = 'make'
+            if clang:
+                command += ' OPENMP=0'
             distutils_logger.info('Will execute the following command in with subprocess.Popen: \n{0}'.format(command))
-
 
             make_process = subprocess.Popen(command,
                                             cwd=sources_path,
@@ -95,10 +129,8 @@ class specialized_build_ext(build_ext, object):
                                             shell=True)
             stdout, stderr = make_process.communicate()
             distutils_logger.debug(stdout)
-            #if stderr:
-            #    raise DistutilsSetupError('An ERROR occured while running the '
-            #                              'Makefile for the {0} library. '
-            #                              'Error status: {1}'.format(output_lib, stderr))
+            distutils_logger.debug(stderr)
+
             # After making the library build the c library's python interface with the parent build_extension method
             super(specialized_build_ext, self).build_extension(ext)
 
@@ -109,7 +141,7 @@ with open("README.md", "r") as fh:
 configuration = {
     'name': 'pyzfp',
     'packages': setuptools.find_packages(),
-    'setup_requires': ['cython>=0.17'],
+    'setup_requires': ['cython>=0.17', 'requests'],
     'ext_modules': lazy_cythonize(extensions),
     'version': "0.1.4",
     'cmdclass': {'build_ext': specialized_build_ext},
