@@ -80,8 +80,8 @@ class specialized_build_ext(build_ext, object):
     def build_extension(self, ext):
         if has_flag(self.compiler, '-fopenmp'):
             for ext in self.extensions:
-                ext.extra_compile_args += '-fopenmp'
-                ext.extra_link_args += '-fopenmp'
+                ext.extra_compile_args += ['-fopenmp']
+                ext.extra_link_args += ['-fopenmp']
             clang = False
         else:
             clang = True
