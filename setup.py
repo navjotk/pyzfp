@@ -113,9 +113,6 @@ class specialized_build_ext(build_ext, object):
                        "the supplied 'sources' base dir "
                        "must exist" % ext.name)
 
-            output_dir = os.path.realpath(os.path.join(sources_path,'..','lib'))
-            if not os.path.exists(output_dir):
-                os.makedirs(output_dir)
             download_file('https://computation.llnl.gov/projects/floating-point-compression/download/zfp-0.5.3.tar.gz')
             command = 'make'
             if clang:
