@@ -73,6 +73,7 @@ def extensions():
 class specialized_build_ext(build_ext, object):
     """
     Specialized builder for testlib library
+    Code borrowed from: https://stackoverflow.com/a/48641638
 
     """
     special_extension = "pyzfp"
@@ -98,7 +99,6 @@ class specialized_build_ext(build_ext, object):
                        "'sources' must be present and must be "
                        "a list of source filenames" % ext.name)
             sources = list(sources)
-
             sources_path = os.path.realpath(sources_path)
             if not sources_path.endswith(os.path.sep):
                 sources_path+= os.path.sep
@@ -109,9 +109,6 @@ class specialized_build_ext(build_ext, object):
                        "the supplied 'sources' base dir "
                        "must exist" % ext.name)
 
-            output_dir = os.path.realpath(os.path.join(sources_path,'..','lib'))
-            if not os.path.exists(output_dir):
-                os.makedirs(output_dir)
             download_file('https://computation.llnl.gov/projects/floating-point-compression/download/zfp-0.5.3.tar.gz')
             command = 'make'
             if clang:
@@ -139,7 +136,7 @@ configuration = {
     'packages': setuptools.find_packages(),
     'setup_requires': ['cython>=0.17', 'requests'],
     'ext_modules': lazy_cythonize(extensions),
-    'version': "0.1.7",
+    'version': "0.2rc1",
     'cmdclass': {'build_ext': specialized_build_ext},
     'description': "A python wrapper for the ZFP compression libary",
     'long_description': long_description,
