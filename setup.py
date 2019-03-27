@@ -99,6 +99,10 @@ class specialized_build_ext(build_ext, object):
                        "'sources' must be present and must be "
                        "a list of source filenames" % ext.name)
             sources = list(sources)
+            if len(sources)>1:
+                sources_path = os.path.commonpath(sources)
+            else:
+                sources_path = os.path.dirname(sources[0])
             sources_path = os.path.realpath(sources_path)
             if not sources_path.endswith(os.path.sep):
                 sources_path+= os.path.sep
