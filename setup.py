@@ -6,7 +6,6 @@ from distutils.errors import DistutilsSetupError
 
 import os, subprocess
 import glob
-import numpy
 import setuptools
 
 
@@ -59,6 +58,7 @@ class lazy_cythonize(list):
 
 
 def extensions():
+    import numpy
     from Cython.Build import cythonize
     ext = Extension("pyzfp",
               sources=["pyzfp.pyx"],
@@ -138,9 +138,9 @@ with open("README.md", "r") as fh:
 configuration = {
     'name': 'pyzfp',
     'packages': setuptools.find_packages(),
-    'setup_requires': ['cython>=0.17', 'requests'],
+    'setup_requires': ['cython>=0.17', 'requests', 'numpy'],
     'ext_modules': lazy_cythonize(extensions),
-    'version': "0.2rc1",
+    'version': "0.2rc2",
     'cmdclass': {'build_ext': specialized_build_ext},
     'description': "A python wrapper for the ZFP compression libary",
     'long_description': long_description,
