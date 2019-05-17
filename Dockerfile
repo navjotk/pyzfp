@@ -69,4 +69,10 @@ RUN chown -R pyzfp /home/pyzfp
 USER pyzfp
 WORKDIR /home/pyzfp
 
-RUN pip install -e .
+RUN if [ $installWithPip == "true" ] ; then \ 
+        pip install --user -e . ; \
+    else \
+      conda env create --name pyzfp ; \
+      source activate pyzfp ; \
+      pip install -e . ; \
+    fi
