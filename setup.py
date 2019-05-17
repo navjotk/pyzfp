@@ -123,7 +123,7 @@ class specialized_build_ext(build_ext, object):
                                             cwd=sources_path,
                                             stderr=subprocess.STDOUT,
                                             shell=True)
-            distutils_logger.info(output)
+            distutils_logger.info(str(output))
 
             # After making the library build the c library's python interface with the parent build_extension method
             super(specialized_build_ext, self).build_extension(ext)
