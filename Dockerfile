@@ -13,4 +13,4 @@ RUN chown -R pyzfp /home/pyzfp
 USER pyzfp
 WORKDIR /home/pyzfp
 
-RUN python setup.py install
+RUN pip install -e .
