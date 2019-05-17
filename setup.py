@@ -66,7 +66,7 @@ def extensions():
                             numpy.get_include()],
               libraries=["zfp"],  # Unix-like specific,
               library_dirs=["zfp-0.5.3/lib"],
-             extra_link_args=['-Wl,-rpath,/usr/local/lib']
+             #extra_link_args=['-Wl,-rpath,/usr/local/lib']
               )
     return cythonize([ext])
 
@@ -119,14 +119,11 @@ class specialized_build_ext(build_ext, object):
                 command += ' OPENMP=0'
             distutils_logger.info('Will execute the following command in with subprocess.Popen: \n{0}'.format(command))
 
-            make_process = subprocess.Popen(command,
+            output = subprocess.check_output(command,
                                             cwd=sources_path,
-                                            stdout=subprocess.PIPE,
-                                            stderr=subprocess.PIPE,
+                                            stderr=subprocess.STDOUT,
                                             shell=True)
-            stdout, stderr = make_process.communicate()
-            distutils_logger.debug(stdout)
-            distutils_logger.debug(stderr)
+            distutils_logger.info(str(output))
 
             # After making the library build the c library's python interface with the parent build_extension method
             super(specialized_build_ext, self).build_extension(ext)
@@ -140,7 +137,7 @@ configuration = {
     'packages': setuptools.find_packages(),
     'setup_requires': ['cython>=0.17', 'requests', 'numpy'],
     'ext_modules': lazy_cythonize(extensions),
-    'version': "0.2rc2",
+    'version': "0.2rc3",
     'cmdclass': {'build_ext': specialized_build_ext},
     'description': "A python wrapper for the ZFP compression libary",
     'long_description': long_description,
