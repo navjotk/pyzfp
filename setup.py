@@ -141,7 +141,7 @@ configuration = {
     'packages': setuptools.find_packages(),
     'setup_requires': ['cython>=0.17', 'requests', 'numpy'],
     'ext_modules': lazy_cythonize(extensions),
-    'version': "0.2rc3",
+    'version': "0.2rc4",
     'cmdclass': {'build_ext': specialized_build_ext},
     'description': "A python wrapper for the ZFP compression libary",
     'long_description': long_description,
