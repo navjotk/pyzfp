@@ -60,10 +60,6 @@ ENV PATH=/usr/local/miniconda/bin:$PATH
 RUN conda config --set always_yes yes --set changeps1 no
 RUN conda update -q conda
 
-RUN apt -y update
-RUN apt -y install git python python-setuptools python-dev make python-pip wget bzip
-
-
 RUN adduser --disabled-password --gecos "" pyzfp
 
 COPY . /home/pyzfp
