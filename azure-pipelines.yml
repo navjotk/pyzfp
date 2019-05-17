@@ -1,0 +1,19 @@
+trigger:
+- master
+
+pr:
+- master  
+
+jobs:
+
+- job: build
+  displayName:  'Test using '
+  pool:
+    vmImage: 'Ubuntu 16.04'
+
+  timeoutInMinutes: 120
+  steps:
+  - task: Docker@1
+    displayName: "Build container"
+    inputs:
+      command: 'build'
