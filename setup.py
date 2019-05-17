@@ -118,11 +118,15 @@ class specialized_build_ext(build_ext, object):
             if clang:
                 command += ' OPENMP=0'
             distutils_logger.info('Will execute the following command in with subprocess.Popen: \n{0}'.format(command))
-
-            output = subprocess.check_output(command,
+            try:
+                output = subprocess.check_output(command,
                                             cwd=sources_path,
                                             stderr=subprocess.STDOUT,
                                             shell=True)
+            except subprocess.CalledProcessError as e:
+                distutils_logger.info(str(e.output))
+                raise
+
             distutils_logger.info(str(output))
 
             # After making the library build the c library's python interface with the parent build_extension method
