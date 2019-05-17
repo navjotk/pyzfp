@@ -1,0 +1,34 @@
+trigger:
+- master
+
+pr:
+- master  
+
+jobs:
+
+- job: build
+  displayName:  'Test using '
+  pool:
+    vmImage: 'Ubuntu 16.04'
+    
+  strategy:
+    matrix:
+      gcc4:
+        gccVersion: '4.9'
+        MPI_INSTALL: '1'
+      gcc8:
+        gccVersion: '8'
+        MPI_INSTALL: '1'
+      nompi-gcc5:
+        gccVersion: '5'
+        MPI_INSTALL: '0'
+      gcc7:
+        gccVersion: '7'
+        MPI_INSTALL: '1'
+
+  timeoutInMinutes: 120
+  steps:
+  - task: Docker@1
+    displayName: "Build container"
+    inputs:
+      command: 'build'
