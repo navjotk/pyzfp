@@ -13,7 +13,8 @@ def download_file(url):
     import requests
     fname = url.split("/")[-1]
     r = requests.get(url)
-    open(fname , 'wb').write(r.content)
+    with open(fname , 'wb') as f:
+        f.write(r.content)
     
 # check whether compiler supports a flag
 def has_flag(compiler, flagname):
