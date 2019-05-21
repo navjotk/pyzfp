@@ -13,7 +13,8 @@ def download_file(url):
     import requests
     fname = url.split("/")[-1]
     r = requests.get(url)
-    open(fname , 'wb').write(r.content)
+    with open(fname , 'wb') as f:
+        f.write(r.content)
     
 # check whether compiler supports a flag
 def has_flag(compiler, flagname):
@@ -141,7 +142,7 @@ configuration = {
     'packages': setuptools.find_packages(),
     'setup_requires': ['cython>=0.17', 'requests', 'numpy'],
     'ext_modules': lazy_cythonize(extensions),
-    'version': "0.2rc4",
+    'version': "0.2rc5",
     'cmdclass': {'build_ext': specialized_build_ext},
     'description': "A python wrapper for the ZFP compression libary",
     'long_description': long_description,
