@@ -114,7 +114,7 @@ class specialized_build_ext(build_ext, object):
                        "the supplied 'sources' base dir "
                        "must exist" % ext.name)
 
-            download_file('https://computation.llnl.gov/projects/floating-point-compression/download/zfp-0.5.5.tar.gz')
+            download_file('ihttps://computing.llnl.gov/system/files/zfp-0.5.5.tar.gz')
             command = 'make'
             if clang:
                 command += ' OPENMP=0'
