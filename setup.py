@@ -116,8 +116,12 @@ class specialized_build_ext(build_ext, object):
 
             download_file('https://computation.llnl.gov/projects/floating-point-compression/download/zfp-0.5.3.tar.gz')
             command = 'make'
+
             if clang:
                 command += ' OPENMP=0'
+            else:
+                command += ' OPENMP=1'
+
             distutils_logger.info('Will execute the following command in with subprocess.Popen: \n{0}'.format(command))
             try:
                 output = subprocess.check_output(command,
