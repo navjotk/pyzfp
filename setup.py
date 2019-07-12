@@ -63,10 +63,10 @@ def extensions():
     from Cython.Build import cythonize
     ext = Extension("pyzfp",
               sources=["pyzfp.pyx"],
-              include_dirs=['zfp-0.5.3/include',
+              include_dirs=['zfp-0.5.5/include',
                             numpy.get_include()],
               libraries=["zfp"],  # Unix-like specific,
-              library_dirs=["zfp-0.5.3/lib"],
+              library_dirs=["zfp-0.5.5/lib"],
              #extra_link_args=['-Wl,-rpath,/usr/local/lib']
               )
     return cythonize([ext])
@@ -114,7 +114,7 @@ class specialized_build_ext(build_ext, object):
                        "the supplied 'sources' base dir "
                        "must exist" % ext.name)
 
-            download_file('https://computation.llnl.gov/projects/floating-point-compression/download/zfp-0.5.3.tar.gz')
+            download_file('https://computing.llnl.gov/system/files/zfp-0.5.5.tar.gz')
             command = 'make'
             if clang:
                 command += ' OPENMP=0'
@@ -142,7 +142,7 @@ configuration = {
     'packages': setuptools.find_packages(),
     'setup_requires': ['cython>=0.17', 'requests', 'numpy'],
     'ext_modules': lazy_cythonize(extensions),
-    'version': "0.2",
+    'version': "0.3",
     'cmdclass': {'build_ext': specialized_build_ext},
     'description': "A python wrapper for the ZFP compression libary",
     'long_description': long_description,
