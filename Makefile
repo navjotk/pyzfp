@@ -1,10 +1,9 @@
-OPENMP = 1
-zfp-0.5.3/lib/libzfp.so: zfp-0.5.3.tar.gz
-	tar -xzvf zfp-0.5.3.tar.gz
+OPENMP = 0
+zfp-0.5.3/lib/libzfp.so: zfp-0.5.3
 	cd zfp-0.5.3 && make ZFP_WITH_OPENMP=$(OPENMP)
 
-zfp-0.5.3.tar.gz: 
-	wget https://computation.llnl.gov/projects/floating-point-compression/download/zfp-0.5.3.tar.gz
+zfp-0.5.3: 
+	git clone -b release0.5.3 https://github.com/LLNL/zfp.git zfp-0.5.3
 
 clean:
 	rm -rf zfp-0.5.3*
