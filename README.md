@@ -1,13 +1,12 @@
 # pyzfp
-Python wrapper over the [zfp compression library](https://computation.llnl.gov/projects/floating-point-compression). This is the second version, rewritten using Cython because the earlier version using ctypes was slow. [Click here](https://github.com/navjotk/pyzfp/blob/ctypes_vs_cython/ctypes_vs_cython_compression.png) for performance comparison. Currently wraps zfp version 0.5.3 . 
+Python wrapper over the [zfp compression library](https://computation.llnl.gov/projects/floating-point-compression). This is the second version, rewritten using Cython because the earlier version using ctypes was slow. [Click here](https://github.com/navjotk/pyzfp/blob/ctypes_vs_cython/ctypes_vs_cython_compression.png) for performance comparison. Currently wraps zfp version 0.5.5. 
 
 # Installation
 ```
 pip install pyzfp
 ```
-This should download zfp version 0.5.3, compile it (with OPENMP
-threading enabled) and leave the shared library ready-to-use  as
-`<Location of module>/zfp-0.5.3/lib/libzfp.so`.
+This should download zfp version 0.5.5, compile it and leave the shared library
+ready-to-use as `<Location of module>/zfp-0.5.5/lib/libzfp.so`.
 
 # Usage
 
