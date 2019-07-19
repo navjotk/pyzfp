@@ -118,6 +118,14 @@ class specialized_build_ext(build_ext, object):
             command = 'make'
             if clang:
                 command += ' OPENMP=0'
+
+            env_vars = ['CC', 'CXX', 'CFLAGS', 'FC']
+
+            for v in env_vars:
+                val = os.getenv(v)
+                if val is not None:
+                    command += ' %s=%s'%(v, val)
+
             distutils_logger.info('Will execute the following command in with subprocess.Popen: \n{0}'.format(command))
             try:
                 output = subprocess.check_output(command,
