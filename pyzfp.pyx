@@ -161,9 +161,9 @@ cdef zfp_field* init_field(np.ndarray indata):
     if numdims == 1:
         return zfp_field_1d(raw_pointer(indata), data_type, shape[0])
     elif numdims == 2:
-        return zfp_field_2d(raw_pointer(indata), data_type, shape[0], shape[1])
+        return zfp_field_2d(raw_pointer(indata), data_type, shape[1], shape[0])
     elif numdims == 3:
-        return zfp_field_3d(raw_pointer(indata), data_type, shape[0], shape[1], shape[2])
+        return zfp_field_3d(raw_pointer(indata), data_type, shape[2], shape[1], shape[0])
     #elif numdims == 4:
     #    return zfp_field_4d(raw_pointer(indata), data_type, shape[0], shape[1], shape[2], shape[4])
     else:
