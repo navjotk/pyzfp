@@ -203,7 +203,7 @@ def compress(indata, tolerance=None, precision=None, rate=None, parallel=True):
     return buff[:zfpsize]
 
 
-def decompress(char[::1] compressed, shape, dtype, tolerance=None, precision=None,
+def decompress(const unsigned char[::1] compressed, shape, dtype, tolerance=None, precision=None,
                rate=None, parallel=True):
     assert(tolerance or precision or rate)
     assert(not(tolerance is not None and precision is not None))
