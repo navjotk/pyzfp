@@ -5,8 +5,9 @@ Python wrapper over the [zfp compression library](https://computation.llnl.gov/p
 ```
 pip install pyzfp
 ```
-This should download zfp version 0.5.5, compile it and leave the shared library
-ready-to-use as `<Location of module>/zfp-0.5.5/lib/libzfp.so`.
+This should download zfp version 0.5.5, compile it and install the python (Cython) wrappers in the default install location. The use of a virtual environment is recommended.
+
+Should you face any issues, please report them using Github issues. 
 
 # Usage
 
