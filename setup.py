@@ -118,6 +118,8 @@ class specialized_build_ext(build_ext, object):
             command = 'make'
             if clang:
                 command += ' OPENMP=0'
+            else:
+                command += ' OPENMP=1'
 
             env_vars = ['CC', 'CXX', 'CFLAGS', 'FC']
 
