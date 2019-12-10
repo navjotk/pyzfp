@@ -150,9 +150,9 @@ with open("README.md", "r") as fh:
 configuration = {
     'name': 'pyzfp',
     'packages': setuptools.find_packages(),
-    'setup_requires': ['cython>=0.17', 'requests', 'numpy'],
+    'setup_requires': ['cython>=0.17', 'requests', 'numpy', 'setuptools_scm'],
     'ext_modules': lazy_cythonize(extensions),
-    'version': "0.3.1",
+    'use_scm_version': True,
     'cmdclass': {'build_ext': specialized_build_ext},
     'description': "A python wrapper for the ZFP compression libary",
     'long_description': long_description,
