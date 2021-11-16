@@ -114,7 +114,7 @@ class specialized_build_ext(build_ext, object):
                        "the supplied 'sources' base dir "
                        "must exist" % ext.name)
 
-            download_file('https://computing.llnl.gov/system/files/zfp-0.5.5.tar.gz')
+            download_file('https://github.com/LLNL/zfp/releases/download/0.5.5/zfp-0.5.5.tar.gz')
             command = 'make'
             if clang:
                 command += ' OPENMP=0'
