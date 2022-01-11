@@ -28,7 +28,7 @@ jobs:
         sudo apt-get install -y gcc-${{ matrix.compiler_v }} \
                                 g++-${{ matrix.compiler_v }}
         python -m pip install --upgrade pip
-        python -m pip install pytest
+        python -m pip install pytest numpy
       env:
         PYTHONPATH: $PWD
         CC: gcc-${{ matrix.compiler_v }}
