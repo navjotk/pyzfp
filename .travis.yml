@@ -83,7 +83,7 @@ matrix:
         - HOMEBREW_NO_AUTO_UPDATE=1
       language: sh
       os: osx
-      osx_image: xcode11
+      osx_image: xcode13
       before_install:
         - pip install pytest
     - addons: 
@@ -98,7 +98,7 @@ matrix:
         - HOMEBREW_NO_AUTO_UPDATE=1
       language: sh
       os: osx
-      osx_image: xcode11
+      osx_image: xcode13
       before_install:
         - pip install pytest
 script: 
