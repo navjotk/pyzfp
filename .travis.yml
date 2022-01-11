@@ -103,4 +103,4 @@ matrix:
         - pip install pytest
 script: 
   - "pip install -e ."
-  - "py.test -svx test.py"
+  - "py.test -svx test.py "
