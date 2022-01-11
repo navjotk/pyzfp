@@ -27,4 +27,4 @@ jobs:
       env:
         PYTHONPATH: $PWD
     - name: Test with pytest
-      run: py.test -vsx tests
+      run: py.test -svx test.py

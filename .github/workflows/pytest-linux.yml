@@ -34,4 +34,4 @@ jobs:
         CC: gcc-${{ matrix.compiler_v }}
         CXX: g++-${{ matrix.compiler_v }}
     - name: Test with pytest
-      run: py.test -vs tests
+      run: py.test -svx test.py
