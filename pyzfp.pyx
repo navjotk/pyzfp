@@ -136,14 +136,14 @@ cdef extern from "zfp.h":
 
 cdef void* raw_pointer_double(arr) except NULL:
     assert(arr.dtype==np.float64)
-    assert(arr.flags.c_contiguous) # if this isn't true, ravel will make a copy
-    cdef double[::1] mview = arr.ravel()
+    assert(arr.flags.forc) # if this isn't true, ravel will make a copy
+    cdef double[::1] mview = arr.ravel(order='A')
     return <void*>&mview[0]
 
 cdef void* raw_pointer_float(arr) except NULL:
-    assert(arr.flags.c_contiguous) # if this isn't true, ravel will make a copy
+    assert(arr.flags.forc) # if this isn't true, ravel will make a copy
     assert(arr.dtype == np.float32)
-    cdef float[::1] mview = arr.ravel()
+    cdef float[::1] mview = arr.ravel(order='A')
     return <void*>&mview[0]
 
 cdef void* raw_pointer(arr):
@@ -204,12 +204,13 @@ def compress(indata, tolerance=None, precision=None, rate=None, parallel=True):
 
 
 def decompress(const unsigned char[::1] compressed, shape, dtype, tolerance=None, precision=None,
-               rate=None, parallel=True):
+               rate=None, parallel=True, order='C'):
     assert(tolerance or precision or rate)
     assert(not(tolerance is not None and precision is not None))
     assert(not(tolerance is not None and rate is not None))
     assert(not(rate is not None and precision is not None))
-    outdata = np.zeros(shape, dtype=dtype)
+    assert(order.upper() in ('C', 'F'))
+    outdata = np.zeros(shape, dtype=dtype, order=order)
     data_type = zfp_types[dtype]
     shape = list(reversed(shape))
     field = init_field(outdata)
