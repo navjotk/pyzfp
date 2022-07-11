@@ -170,6 +170,34 @@ cdef zfp_field* init_field(np.ndarray indata):
         raise ValueError("Invalid number of dimensions (valid: 1-4)")
 
 def compress(indata, tolerance=None, precision=None, rate=None, parallel=True):
+    """
+    Compress a numpy array using zfp.
+
+    Parameters
+    ----------
+    indata : numpy.ndarray
+        The data to compress.
+    tolerance : float, optional
+        The tolerance for the compressed data.
+        This will use ZFP in fixed-tolerance mode.
+        One of tolerance, precision, or rate must be specified.
+    precision : int, optional
+        The precision of the compressed data.
+        This will use ZFP in fixed-precision mode.
+        One of tolerance, precision, or rate must be specified.
+    rate : float, optional
+        The rate of the compressed data.
+        This will use ZFP in fixed-rate mode.
+        One of tolerance, precision, or rate must be specified.
+    parallel : bool, optional
+        Whether to use parallel compression.
+        This will use ZFP in parallel mode.
+    
+    Returns
+    -------
+    outdata : Cython.memoryview
+        The compressed data.
+    """
     assert(tolerance or precision or rate)
     assert(not(tolerance is not None and precision is not None))
     assert(not(tolerance is not None and rate is not None))
@@ -204,7 +232,43 @@ def compress(indata, tolerance=None, precision=None, rate=None, parallel=True):
 
 
 def decompress(const unsigned char[::1] compressed, shape, dtype, tolerance=None, precision=None,
-               rate=None, parallel=True, order='C'):
+               rate=None, parallel=False, order='C'):
+    """
+    Decompress a numpy array using zfp.
+
+    Parameters
+    ----------
+    compressed : Cython.memoryview
+        The compressed data.
+    shape : tuple
+        The shape of the decompressed data.
+    dtype : numpy.dtype
+        The dtype of the decompressed data.
+    tolerance : float, optional
+        The tolerance for the compressed data.
+        This will use ZFP in fixed-tolerance mode.
+        One of tolerance, precision, or rate must be specified.
+    precision : int, optional
+        The precision of the compressed data.
+        This will use ZFP in fixed-precision mode.
+        One of tolerance, precision, or rate must be specified.
+    rate : float, optional
+        The rate of the compressed data.
+        This will use ZFP in fixed-rate mode.
+        One of tolerance, precision, or rate must be specified.
+    parallel : bool, optional
+        Whether to use parallel decompression.
+        This will use ZFP in parallel mode.
+    order : str, optional
+        The order of the decompressed data.
+        Must be either C or F(ortran).
+        Default is C.
+    
+    Returns
+    -------
+    outdata : numpy.ndarray
+        The decompressed data.
+    """
     assert(tolerance or precision or rate)
     assert(not(tolerance is not None and precision is not None))
     assert(not(tolerance is not None and rate is not None))
@@ -222,9 +286,12 @@ def decompress(const unsigned char[::1] compressed, shape, dtype, tolerance=None
         zfp_stream_set_precision(stream, precision)
     elif rate is not None:
         zfp_stream_set_rate(stream, rate, data_type, len(shape), 0)
-    # Try multithreaded
-    #if(parallel):
-    #    zfp_stream_set_execution(stream, zfp_exec_omp)
+    
+    if(parallel):
+        try:
+            zfp_stream_set_execution(stream, zfp_exec_omp)
+        except:
+            raise ValueError("Parallel decompression not supported on this platform")
     bitstream = stream_open(<void*>&compressed[0], len(compressed))
     zfp_stream_set_bit_stream(stream, bitstream)
     zfp_stream_rewind(stream)
