@@ -164,8 +164,8 @@ cdef zfp_field* init_field(np.ndarray indata):
         return zfp_field_2d(raw_pointer(indata), data_type, shape[1], shape[0])
     elif numdims == 3:
         return zfp_field_3d(raw_pointer(indata), data_type, shape[2], shape[1], shape[0])
-    #elif numdims == 4:
-    #    return zfp_field_4d(raw_pointer(indata), data_type, shape[0], shape[1], shape[2], shape[4])
+    elif numdims == 4:
+       return zfp_field_4d(raw_pointer(indata), data_type, shape[3], shape[2], shape[1], shape[0])
     else:
         raise ValueError("Invalid number of dimensions (valid: 1-4)")
 
