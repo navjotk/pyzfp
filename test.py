@@ -39,5 +39,16 @@ def test_dim_order(order):
     compressed = compress(a, rate=8)
     recovered = decompress(compressed[0:16], (4, 4), np.dtype('float32'),
                            rate=8, order=order)
-    b = np.arange(16, dtype=np.float32).reshape((4, 4), order=order)
+    if order == "C":
+        b = np.arange(16, dtype=np.float32).reshape((4, 4), order=order)
+    elif order == "F":
+        b = np.array(
+            [[ 0,  8, 16, 24],
+             [ 1,  9, 17, 25],
+             [ 2, 10, 18, 26],
+             [ 3, 11, 19, 27]], 
+            dtype=np.float32, order="F")
     assert(np.allclose(recovered, b))
+
+    recovered = decompress(compressed, (8,4), np.dtype('float32'), rate=8, order=order)
+    assert(np.allclose(recovered, a))
