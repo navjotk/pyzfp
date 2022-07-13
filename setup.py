@@ -70,6 +70,7 @@ def extensions():
                                   numpy.get_include()],
                     libraries=["zfp"],  # Unix-like specific,
                     library_dirs=["zfp-0.5.5/lib"],
+                    language='c',
                     # extra_link_args=['-Wl,-rpath,/usr/local/lib']
                     )
     return cythonize([ext])
