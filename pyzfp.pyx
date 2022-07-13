@@ -157,15 +157,24 @@ zfp_types = {np.dtype('float32'): zfp_type_float, np.dtype('float64'): zfp_type_
 cdef zfp_field* init_field(np.ndarray indata):
     data_type = zfp_types[indata.dtype]
     numdims = len((<object> indata).shape)
-    shape = indata.shape
+
+    # Had to do this awkward construction
+    # because list(indata.shape) had an error.
+    shape = []
+    for i in range(indata.ndim):
+      shape.append(indata.shape[i])
+
+    if indata.flags.c_contiguous:
+      shape = shape[::-1]
+
     if numdims == 1:
         return zfp_field_1d(raw_pointer(indata), data_type, shape[0])
     elif numdims == 2:
-        return zfp_field_2d(raw_pointer(indata), data_type, shape[1], shape[0])
+        return zfp_field_2d(raw_pointer(indata), data_type, shape[0], shape[1])
     elif numdims == 3:
-        return zfp_field_3d(raw_pointer(indata), data_type, shape[2], shape[1], shape[0])
+        return zfp_field_3d(raw_pointer(indata), data_type, shape[0], shape[1], shape[2])
     elif numdims == 4:
-       return zfp_field_4d(raw_pointer(indata), data_type, shape[3], shape[2], shape[1], shape[0])
+       return zfp_field_4d(raw_pointer(indata), data_type, shape[0], shape[1], shape[2], shape[3])
     else:
         raise ValueError("Invalid number of dimensions (valid: 1-4)")
 
