@@ -221,7 +221,7 @@ def decompress(const unsigned char[::1] compressed, shape, dtype, tolerance=None
     assert(order.upper() in ('C', 'F'))
     outdata = np.zeros(shape, dtype=dtype, order=order)
     data_type = zfp_types[dtype]
-    shape = list(reversed(shape))
+    
     field = init_field(outdata)
     stream = zfp_stream_open(NULL)
 
