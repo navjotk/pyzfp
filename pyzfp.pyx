@@ -179,17 +179,20 @@ def compress(indata, tolerance=None, precision=None, rate=None, parallel=True):
         The data to compress.
     tolerance : float, optional
         The tolerance for the compressed data.
-        This will use ZFP in fixed-tolerance mode.
+        This will use ZFP in fixed-accuracy mode.
+        https://zfp.readthedocs.io/en/latest/modes.html#mode-fixed-accuracy
         One of tolerance, precision, or rate must be specified.
     precision : int, optional
         The precision of the compressed data.
         This will use ZFP in fixed-precision mode.
+        https://zfp.readthedocs.io/en/latest/modes.html#fixed-precision-mode
         One of tolerance, precision, or rate must be specified.
     rate : float, optional
         The rate of the compressed data.
         This will use ZFP in fixed-rate mode.
+        https://zfp.readthedocs.io/en/latest/modes.html#fixed-rate-mode
         One of tolerance, precision, or rate must be specified.
-    parallel : bool, optional
+    parallel : bool, optional, default True
         Whether to use parallel compression.
         This will use ZFP in parallel mode.
     
@@ -246,23 +249,25 @@ def decompress(const unsigned char[::1] compressed, shape, dtype, tolerance=None
         The dtype of the decompressed data.
     tolerance : float, optional
         The tolerance for the compressed data.
-        This will use ZFP in fixed-tolerance mode.
+        This will use ZFP in fixed-accuracy mode.
+        https://zfp.readthedocs.io/en/latest/modes.html#mode-fixed-accuracy
         One of tolerance, precision, or rate must be specified.
     precision : int, optional
         The precision of the compressed data.
         This will use ZFP in fixed-precision mode.
+        https://zfp.readthedocs.io/en/latest/modes.html#fixed-precision-mode
         One of tolerance, precision, or rate must be specified.
     rate : float, optional
         The rate of the compressed data.
         This will use ZFP in fixed-rate mode.
+        https://zfp.readthedocs.io/en/latest/modes.html#fixed-rate-mode
         One of tolerance, precision, or rate must be specified.
-    parallel : bool, optional
+    parallel : bool, optional, default False
         Whether to use parallel decompression.
         This will use ZFP in parallel mode.
-    order : str, optional
+    order : str, optional, default 'C'
         The order of the decompressed data.
         Must be either C or F(ortran).
-        Default is C.
     
     Returns
     -------
