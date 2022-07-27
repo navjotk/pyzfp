@@ -348,3 +348,34 @@ def decompress(const unsigned char[::1] compressed, parallel=True, order='C'):
         stream_close(bitstream)
 
 
+def header(const unsigned char[::1] compressed) -> zfp_field:
+    stream = zfp_stream_open(NULL)
+    bitstream = stream_open(<void*>&compressed[0], len(compressed))
+    zfp_stream_set_bit_stream(stream, bitstream)
+    zfp_stream_rewind(stream)
+
+    cdef zfp_field header_field
+    cdef size_t header_bytes = 0
+
+    try:
+        header_bytes = zfp_read_header(stream, &header_field, ZFP_HEADER_FULL)
+
+        if header_bytes == 0:
+            raise DecodingError("Unable to read stream header.")
+
+        return {
+            'dtype': zfp_types[header_field.type],
+            'nx': header_field.nx,
+            'ny': header_field.ny,
+            'nz': header_field.nz,
+            'nw': header_field.nw,
+            'sx': header_field.sx,
+            'sy': header_field.sy,
+            'sz': header_field.sz,
+            'sw': header_field.sw,
+        }
+    finally:
+        zfp_stream_close(stream)
+        stream_close(bitstream)
+
+
