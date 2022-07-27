@@ -262,22 +262,28 @@ def compress(indata, tolerance=None, precision=None, rate=None, parallel=True):
     bufsize = zfp_stream_maximum_size(stream, field)
     cdef char[::1] buff = view.array(shape=(bufsize,), itemsize=sizeof(char), format='B')
     bitstream = stream_open(<void *>&buff[0], bufsize)
-    zfp_stream_set_bit_stream(stream, bitstream)
-    zfp_stream_rewind(stream)
-    cdef size_t header_bytes = zfp_write_header(stream, field, ZFP_HEADER_FULL)
+    cdef size_t header_bytes = 0
+    cdef size_t zfpsize = 0
+    try:
+        zfp_stream_set_bit_stream(stream, bitstream)
+        zfp_stream_rewind(stream)
 
-    if header_bytes == 0:
-      raise EncodingError("Unable to write header.")
+        header_bytes = zfp_write_header(stream, field, ZFP_HEADER_FULL)
 
-    cdef size_t zfpsize = zfp_compress(stream, field)
+        if header_bytes == 0:
+          raise EncodingError("Unable to write header.")
 
-    if zfpsize == 0:
-      raise EncodingError("Unable to write byte stream.")
+        zfpsize = zfp_compress(stream, field)
 
-    zfp_field_free(field)
-    zfp_stream_close(stream)
-    stream_close(bitstream)
-    return buff[:header_bytes + zfpsize]
+        if zfpsize == 0:
+          raise EncodingError("Unable to write byte stream.")
+
+        return buff[:header_bytes + zfpsize]
+    finally:
+        zfp_field_free(field)
+        zfp_stream_close(stream)
+        stream_close(bitstream)
+    
 
 def decompress(const unsigned char[::1] compressed, parallel=True, order='C'):
     """
@@ -305,31 +311,40 @@ def decompress(const unsigned char[::1] compressed, parallel=True, order='C'):
     
     stream = zfp_stream_open(NULL)
     bitstream = stream_open(<void*>&compressed[0], len(compressed))
-    zfp_stream_set_bit_stream(stream, bitstream)
-    zfp_stream_rewind(stream)
 
     cdef zfp_field header_field
-    cdef size_t header_bytes = zfp_read_header(stream, &header_field, ZFP_HEADER_FULL)
+    cdef size_t header_bytes = 0
+    try:
+        zfp_stream_set_bit_stream(stream, bitstream)
+        zfp_stream_rewind(stream)
 
-    if header_bytes == 0:
-        raise DecodingError("Unable to read stream header.")
+        header_bytes = zfp_read_header(stream, &header_field, ZFP_HEADER_FULL)
 
-    shape = [ header_field.nx, header_field.ny, header_field.nz, header_field.nw ]
-    shape = [ dim for dim in shape if dim > 0 ]
+        if header_bytes == 0:
+            raise DecodingError("Unable to read stream header.")
 
-    if order == "C":
-        shape = shape[::-1]
+        shape = [ header_field.nx, header_field.ny, header_field.nz, header_field.nw ]
+        shape = [ dim for dim in shape if dim > 0 ]
 
-    outdata = np.zeros(shape, dtype=zfp_types[header_field.type], order=order)
-    field = init_field(outdata)
-    if(parallel):
+        if order == "C":
+            shape = shape[::-1]
+
+        outdata = np.zeros(shape, dtype=zfp_types[header_field.type], order=order)
+        field = init_field(outdata)
         try:
-            zfp_stream_set_execution(stream, zfp_exec_omp)
-        except:
-            raise ValueError("Parallel decompression not supported on this platform")
+            if(parallel):
+                try:
+                    zfp_stream_set_execution(stream, zfp_exec_omp)
+                except:
+                    raise ValueError("Parallel decompression not supported on this platform")
 
-    zfp_decompress(stream, field)
-    zfp_field_free(field)
-    zfp_stream_close(stream)
-    stream_close(bitstream)
-    return outdata
+            zfp_decompress(stream, field)
+
+            return outdata
+        finally:
+            zfp_field_free(field)
+    finally:
+        zfp_stream_close(stream)
+        stream_close(bitstream)
+
+
