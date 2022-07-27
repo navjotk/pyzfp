@@ -55,6 +55,12 @@ cdef extern from "zfp.h":
       int sx, sy, sz, sw;  #/* strides (zero for contiguous array a[nw][nz][ny][nx]) */
       void* data;          #/* pointer to array data */
 
+  cdef uint ZFP_HEADER_NONE 
+  cdef uint ZFP_HEADER_MAGIC
+  cdef uint ZFP_HEADER_META 
+  cdef uint ZFP_HEADER_MODE
+  cdef uint ZFP_HEADER_FULL 
+
   cdef uint zfp_stream_set_precision(zfp_stream* stream, uint precision);
 
   cdef double zfp_stream_set_rate(
@@ -134,6 +140,18 @@ cdef extern from "zfp.h":
       zfp_field* field #/* field metadata */
   );
 
+  cdef size_t zfp_write_header(
+      zfp_stream* stream, #/* compressed stream */
+      const zfp_field* field,    #/* field metadata */
+      uint umask
+  );
+
+  cdef size_t zfp_read_header(
+      zfp_stream* stream, #/* compressed stream */
+      const zfp_field* field,    #/* field metadata */
+      uint umask
+  );
+
 cdef void* raw_pointer_double(arr) except NULL:
     assert(arr.dtype==np.float64)
     assert(arr.flags.forc) # if this isn't true, ravel will make a copy
@@ -152,7 +170,18 @@ cdef void* raw_pointer(arr):
     else:
         return raw_pointer_double(arr)
 
-zfp_types = {np.dtype('float32'): zfp_type_float, np.dtype('float64'): zfp_type_double}
+zfp_types = {
+  np.dtype('float32'): zfp_type_float, 
+  np.dtype('float64'): zfp_type_double,
+  zfp_type_float: np.dtype('float32'), 
+  zfp_type_double: np.dtype('float64'),
+}
+
+class EncodingError(Exception):
+  pass
+
+class DecodingError(Exception):
+  pass
 
 cdef zfp_field* init_field(np.ndarray indata):
     data_type = zfp_types[indata.dtype]
@@ -235,16 +264,22 @@ def compress(indata, tolerance=None, precision=None, rate=None, parallel=True):
     bitstream = stream_open(<void *>&buff[0], bufsize)
     zfp_stream_set_bit_stream(stream, bitstream)
     zfp_stream_rewind(stream)
-    zfpsize = zfp_compress(stream, field)
+    cdef size_t header_bytes = zfp_write_header(stream, field, ZFP_HEADER_FULL)
+
+    if header_bytes == 0:
+      raise EncodingError("Unable to write header.")
+
+    cdef size_t zfpsize = zfp_compress(stream, field)
+
+    if zfpsize == 0:
+      raise EncodingError("Unable to write byte stream.")
 
     zfp_field_free(field)
     zfp_stream_close(stream)
     stream_close(bitstream)
-    return buff[:zfpsize]
+    return buff[:header_bytes + zfpsize]
 
-
-def decompress(const unsigned char[::1] compressed, shape, dtype, tolerance=None, precision=None,
-               rate=None, parallel=False, order='C'):
+def decompress(const unsigned char[::1] compressed, parallel=True, order='C'):
     """
     Decompress a numpy array using zfp.
 
@@ -252,25 +287,6 @@ def decompress(const unsigned char[::1] compressed, shape, dtype, tolerance=None
     ----------
     compressed : Cython.memoryview
         The compressed data.
-    shape : tuple
-        The shape of the decompressed data.
-    dtype : numpy.dtype
-        The dtype of the decompressed data.
-    tolerance : float, optional
-        The tolerance for the compressed data.
-        This will use ZFP in fixed-accuracy mode.
-        https://zfp.readthedocs.io/en/latest/modes.html#mode-fixed-accuracy
-        One of tolerance, precision, or rate must be specified.
-    precision : int, optional
-        The precision of the compressed data.
-        This will use ZFP in fixed-precision mode.
-        https://zfp.readthedocs.io/en/latest/modes.html#fixed-precision-mode
-        One of tolerance, precision, or rate must be specified.
-    rate : float, optional
-        The rate of the compressed data.
-        This will use ZFP in fixed-rate mode.
-        https://zfp.readthedocs.io/en/latest/modes.html#fixed-rate-mode
-        One of tolerance, precision, or rate must be specified.
     parallel : bool, optional, default False
         Whether to use parallel decompression.
         This will use ZFP in parallel mode.
@@ -283,32 +299,35 @@ def decompress(const unsigned char[::1] compressed, shape, dtype, tolerance=None
     outdata : numpy.ndarray
         The decompressed data.
     """
-    assert(tolerance or precision or rate)
-    assert(not(tolerance is not None and precision is not None))
-    assert(not(tolerance is not None and rate is not None))
-    assert(not(rate is not None and precision is not None))
-    assert(order.upper() in ('C', 'F'))
-    outdata = np.zeros(shape, dtype=dtype, order=order)
-    data_type = zfp_types[dtype]
-    
-    field = init_field(outdata)
-    stream = zfp_stream_open(NULL)
 
-    if tolerance is not None:
-        zfp_stream_set_accuracy(stream, tolerance)
-    elif precision is not None:
-        zfp_stream_set_precision(stream, precision)
-    elif rate is not None:
-        zfp_stream_set_rate(stream, rate, data_type, len(shape), 0)
+    order = order.upper()
+    assert(order in ('C', 'F'))
     
+    stream = zfp_stream_open(NULL)
+    bitstream = stream_open(<void*>&compressed[0], len(compressed))
+    zfp_stream_set_bit_stream(stream, bitstream)
+    zfp_stream_rewind(stream)
+
+    cdef zfp_field header_field
+    cdef size_t header_bytes = zfp_read_header(stream, &header_field, ZFP_HEADER_FULL)
+
+    if header_bytes == 0:
+        raise DecodingError("Unable to read stream header.")
+
+    shape = [ header_field.nx, header_field.ny, header_field.nz, header_field.nw ]
+    shape = [ dim for dim in shape if dim > 0 ]
+
+    if order == "C":
+        shape = shape[::-1]
+
+    outdata = np.zeros(shape, dtype=zfp_types[header_field.type], order=order)
+    field = init_field(outdata)
     if(parallel):
         try:
             zfp_stream_set_execution(stream, zfp_exec_omp)
         except:
             raise ValueError("Parallel decompression not supported on this platform")
-    bitstream = stream_open(<void*>&compressed[0], len(compressed))
-    zfp_stream_set_bit_stream(stream, bitstream)
-    zfp_stream_rewind(stream)
+
     zfp_decompress(stream, field)
     zfp_field_free(field)
     zfp_stream_close(stream)
